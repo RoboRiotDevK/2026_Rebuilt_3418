@@ -1,26 +1,20 @@
 name: AI Robot Code Review
 
 on:
-  # 1. Trigger on Pull Requests (The standard mentor workflow)
   pull_request:
     branches: [ "main" ]
-  
-  # 2. Trigger Manually (Click a button anytime)
   workflow_dispatch:
-
-  # 3. Trigger Weekly (Every Sunday at 8:00 AM UTC)
   schedule:
     - cron: '0 8 * * 0'
 
-# Prevent multiple runs on the same branch from queueing up
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
   contents: read
   pull-requests: write
-  issues: write # Needed for the weekly report
+  issues: write
 
 jobs:
   gemini-review:
@@ -43,16 +37,15 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python .github/scripts/frc_reviewer.py
 
-      # --- OUTPUT 1: Comment on Pull Request ---
+      # --- FIXED SECTION: Uses a valid action ---
       - name: Comment on PR
         if: github.event_name == 'pull_request'
-        uses: tholman/file-to-comment-action@v1
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          filePath: ./code_review.md
-          comment_tag: gemini_review
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          header: gemini_review
+          path: code_review.md
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # --- OUTPUT 2: Create Issue (For Weekly/Manual runs) ---
       - name: Create Report Issue
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: peter-evans/create-issue-from-file@v5
