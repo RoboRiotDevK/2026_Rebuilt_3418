@@ -23,6 +23,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          # Fetch all history so we can diff against main
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,12 +35,31 @@ jobs:
       - name: Install Dependencies
         run: pip install google-genai
 
+      # --- NEW: Identify Changed Files ---
+      - name: Get Changed Files
+        id: changed-files
+        if: github.event_name == 'pull_request'
+        run: |
+          # Robustly find the base branch to diff against
+          BASE_REF="origin/main"
+          if ! git show-ref --verify --quiet refs/remotes/origin/main; then
+            echo "Main not found, defaulting to HEAD^"
+            BASE_REF="HEAD^"
+          fi
+          
+          echo "Calculating diff against $BASE_REF..."
+          # Get list of changed files, separate by comma
+          CHANGED=$(git diff --name-only $BASE_REF HEAD | tr '\n' ',')
+          echo "CHANGED_FILES=$CHANGED" >> $GITHUB_ENV
+          echo "Files changed: $CHANGED"
+
       - name: Run Gemini Analysis
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Pass the list of changes (will be empty if not a PR)
+          CHANGED_FILES: ${{ env.CHANGED_FILES }}
         run: python .github/scripts/frc_reviewer.py
 
-      # --- FIXED SECTION: Uses a valid action ---
       - name: Comment on PR
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
