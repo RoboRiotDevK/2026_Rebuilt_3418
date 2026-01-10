@@ -33,6 +33,7 @@ public final class Constants {
     public static final double LEFT_Y_DEADBAND = 0.15;
     public static final double RIGHT_X_DEADBAND = 0.15;
     public static final double TURN_CONSTANT = 6;
+    private int test=0;
   }
 
   public static final class DrivebaseConstants {
