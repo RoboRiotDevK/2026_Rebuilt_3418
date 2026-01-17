@@ -53,8 +53,8 @@ public class RobotContainer {
    */
   public DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-      () -> m_primary.getY() * ((m_primary.getZ() - (23 / 9)) / (40 / 9)),
-      () -> m_primary.getX() * ((m_primary.getZ() - (23 / 9)) / (40 / 9)))
+      () -> m_primary.getY() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)),
+      () -> m_primary.getX() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)))
       .withControllerRotationAxis(getPosTwist)
       .deadband(OperatorConstants.DEADBAND)
       .allianceRelativeControl(true);
