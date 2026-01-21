@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoOrientCmd;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.util.drivers.Limelight;
 import swervelib.SwerveInputStream;
 
 /**
@@ -34,9 +33,6 @@ import swervelib.SwerveInputStream;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-
-  private final Limelight m_Limelight = new Limelight();
 
   CommandJoystick m_primary = Constants.OperatorConstants.PRIMARY;
   CommandXboxController m_secondary = Constants.OperatorConstants.SECONDARY;
@@ -102,8 +98,8 @@ public class RobotContainer {
     BooleanSupplier deathMode = () -> m_primary.getHID().getRawButton(10);
     Trigger deathModeTrig = new Trigger(deathMode);
 
-    // Auto Orient
-    m_primary.axisGreaterThan(6, .5).whileTrue(new AutoOrientCmd(drivebase, m_Limelight, 2, 4.25, -3.9, 2));
+    // Auto Orient (I dont believe we need this - Darwin )
+    m_primary.axisGreaterThan(6, .5).whileTrue(new AutoOrientCmd(drivebase, 2, 4.25, -3.9, 2));
     // Auto Commands
 
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);

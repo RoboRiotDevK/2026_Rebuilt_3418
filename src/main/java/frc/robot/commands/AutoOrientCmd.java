@@ -9,13 +9,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.util.drivers.Limelight;
+import frc.robot.util.drivers.LimelightHelpers;
 
 /** An example command that uses an example subsystem. */
 public class AutoOrientCmd extends Command {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
   private final SwerveSubsystem m_Swerve; // Subsystem + Limelight
-  private final Limelight m_Limelight;
 
   private int pipenum; // Variables
   private double desiredDistance;
@@ -28,10 +27,9 @@ public class AutoOrientCmd extends Command {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public AutoOrientCmd(SwerveSubsystem Veer, Limelight limejuice, int SelPipeline, double distance, double traget,
+  public AutoOrientCmd(SwerveSubsystem Veer, int SelPipeline, double distance, double traget,
       double TargetDB) { // Sets everything up
     this.m_Swerve = Veer; // Drivetrain Subsystem
-    this.m_Limelight = limejuice; // Limelight
     this.pipenum = SelPipeline;
     this.desiredDistance = distance;
     this.XTarget = traget;
@@ -45,8 +43,7 @@ public class AutoOrientCmd extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_Limelight.SetPipeline(pipenum); // Chooses correct pipeline upon running.
-
+    LimelightHelpers.setPipelineIndex("limelight", pipenum); // Chooses correct pipeline upon running.
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -54,16 +51,18 @@ public class AutoOrientCmd extends Command {
   public void execute() {
     SmartDashboard.putBoolean("Lined Up?", false);
     System.out.println("Orient Right");
+    boolean tv = LimelightHelpers.getTV("limelight");
+    if (tv && chosenSide == 1) {
+      double tx = LimelightHelpers.getTX("limelight");
 
-    if (m_Limelight.l1_tv.getDouble(0) == 1 && chosenSide == 1) {
-      if (m_Limelight.l1_ta.getDouble(0) < desiredDistance) { // Executes this code if limelight is far enough away from
-        // apriltag.
+
+      if (LimelightHelpers.getTA("limelight") < desiredDistance) { // Executes this code if limelight is far enough away from
         System.out.println("far enough");
-        if (m_Limelight.l1_tx.getDouble(0) > XTarget + DB) { // Executes this code if limelight is to the right and in
+        if (tx > XTarget + DB) { // Executes this code if limelight is to the right and in
           // bounds
           System.out.println("it drive pls");
           m_Swerve.drive(new ChassisSpeeds(.5, .4, 0.0));
-        } else if (m_Limelight.l1_tx.getDouble(0) < XTarget - DB) { // executes this code if limelight is to the left
+        } else if (tx < XTarget - DB) { // executes this code if limelight is to the left
           // and
           // in bounds
           System.out.println("it drive pls other way");
@@ -73,17 +72,17 @@ public class AutoOrientCmd extends Command {
           m_Swerve.drive(new ChassisSpeeds(00, .75, 0));
         }
       } else {
-        if (m_Limelight.l1_tx.getDouble(0) > XTarget + DB) { // Executes this code if limelight is to the right and in
+        if (tx > XTarget + DB) { // Executes this code if limelight is to the right and in
           // bounds
           System.out.println("it drive pls");
           m_Swerve.drive(new ChassisSpeeds(.25, 0, 0.0));
-        } else if (m_Limelight.l1_tx.getDouble(0) < XTarget - DB) { // executes this code if limelight is to the left
+        } else if (tx < XTarget - DB) { // executes this code if limelight is to the left
           // and in bounds
           System.out.println("it drive pls other way");
           m_Swerve.drive(new ChassisSpeeds((-.25), 0, 0.0));
         }
       }
-    } else if (m_Limelight.l2_tv.getDouble(0) == 1 && chosenSide == -1) {
+    }/* else if (m_Limelight.l2_tv.getDouble(0) == 1 && chosenSide == -1) {      We do not have two limelights
       if (m_Limelight.l2_ta.getDouble(0) < desiredDistance) { // Executes this code if limelight is far enough away from
                                                               // apriltag.
         System.out.println("far enough");
@@ -112,7 +111,7 @@ public class AutoOrientCmd extends Command {
           m_Swerve.drive(new ChassisSpeeds(-.25, 0, 0.0));
         }
       }
-    } else {
+    }*/ else {
       System.out.println("unseen");
     }
 
@@ -139,8 +138,8 @@ public class AutoOrientCmd extends Command {
      */
     // m_Swerve.drive(new ChassisSpeeds(1, 0, 0));
     SmartDashboard.putNumber("Limelight in Use", chosenSide);
-    SmartDashboard.putBoolean("L1", m_Limelight.l1_tv.getDouble(00) == 1);
-    SmartDashboard.putBoolean("L2", m_Limelight.l2_tv.getDouble(00) == 1);
+    SmartDashboard.putBoolean("L1", tv);
+    //SmartDashboard.putBoolean("L2", m_Limelight.l2_tv.getDouble(00) == 1);
   }
 
   // Called once the command ends or is interrupted.
@@ -148,23 +147,21 @@ public class AutoOrientCmd extends Command {
   public void end(boolean interrupted) {
     m_Swerve.drive(new ChassisSpeeds(0, 0, 0));
     SmartDashboard.putBoolean("Lined Up?",
-        !(m_Limelight.l1_tv.getDouble(0) == 0 && m_Limelight.l2_tv.getDouble(0) == 0));
+        !(LimelightHelpers.getTV("limelight")));
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     // return false;
-    return (m_Limelight.l1_tx.getDouble(0) <= XTarget + DB &&
-        m_Limelight.l1_tx.getDouble(0) >= XTarget - DB &&
-        m_Limelight.l1_ta.getDouble(0) >= desiredDistance
-        /* L1 end */ || /*
-                         * L2 begin
-                         */ m_Limelight.l2_tx.getDouble(0) <= XTarget + DB &&
-            m_Limelight.l2_tx.getDouble(0) >= XTarget - DB &&
-            m_Limelight.l2_ta.getDouble(0) >= desiredDistance /* L2 end */)
+    double tx = LimelightHelpers.getTX("limelight"), ta = LimelightHelpers.getTA("limelight");
+    boolean tv = LimelightHelpers.getTV("limelight");
+
+    return (tx <= XTarget + DB &&
+        tx >= XTarget - DB &&
+        ta >= desiredDistance
         ||
-        (m_Limelight.l1_tv.getDouble(0) == 0 && m_Limelight.l2_tv.getDouble(0) == 0);
+        (tv));
 
     // return (m_Limelight.l1_tv.getDouble(0) == 0 && m_Limelight.l2_tv.getDouble(0)
     // == 0);
