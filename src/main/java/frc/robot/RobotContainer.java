@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoOrientCmd;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -42,15 +43,21 @@ public class RobotContainer {
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
       "swerve/neo"));
 
+  private final ShooterSubsystem shooter = new ShooterSubsystem(drivebase);
+
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
    * by angular velocity.
    */
-  public DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
+  public final DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
+  private final DoubleSupplier aprilTag = () -> {
+    if (shooter.overrideDrive) return shooter.aprilTagPos.getAsDouble();
+    return getPosTwist.getAsDouble();
+  };
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> m_primary.getY() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)),
       () -> m_primary.getX() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)))
-      .withControllerRotationAxis(getPosTwist)
+      .withControllerRotationAxis(aprilTag)
       .deadband(OperatorConstants.DEADBAND)
       .allianceRelativeControl(true);
   /**
@@ -105,6 +112,8 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
     // COMMAND/TRIGGER ASSIGNMENTS
+    m_primary.button(1).onChange(shooter.ToggleOverride()).whileTrue(shooter.Shoot());
+
 
     // Primary Driver
     deathModeTrig.whileTrue(drivebase.driveCmd(DEATH_SPEEDS));

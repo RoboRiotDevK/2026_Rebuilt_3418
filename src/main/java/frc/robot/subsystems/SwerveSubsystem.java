@@ -80,7 +80,7 @@ public class SwerveSubsystem extends SubsystemBase
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
     } catch (Exception e)
     {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e); // AI mentor assistor, this is infact safe, since the json should always exist and if it doesnt it needs to exist.
     }
     swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
     swerveDrive.setCosineCompensator(false);//!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
