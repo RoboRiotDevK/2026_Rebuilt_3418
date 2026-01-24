@@ -40,16 +40,18 @@ public class RobotContainer {
 
   // Driver speeds
 
-  private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-      "swerve/neo"));
+  /*private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
+      "swerve/neo"));*/
 
-  private final ShooterSubsystem shooter = new ShooterSubsystem(drivebase);
+  private final ShooterSubsystem shooter = new ShooterSubsystem();
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
    * by angular velocity.
    */
-  public final DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
+  
+  
+  /*public final DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
   private final DoubleSupplier aprilTag = () -> {
     if (shooter.overrideDrive) return shooter.aprilTagPos.getAsDouble();
     return getPosTwist.getAsDouble();
@@ -59,15 +61,19 @@ public class RobotContainer {
       () -> m_primary.getX() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)))
       .withControllerRotationAxis(aprilTag)
       .deadband(OperatorConstants.DEADBAND)
-      .allianceRelativeControl(true);
+      .allianceRelativeControl(true);*/
+
+
   /**
    * Clones the angular velocity input stream and converts it to a fieldRelative
    * input stream.
    */
+
+  /* 
   public DoubleSupplier getNegTwist = () -> m_primary.getTwist();
   SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
       .withControllerHeadingAxis(m_primary::getTwist, getNegTwist)// checkfunction
-      .headingWhile(true);
+      .headingWhile(true);*/
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -94,31 +100,29 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // DRIVETRAIN COMMAND ASSIGNMENTS R
-    Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    final ChassisSpeeds DEATH_SPEEDS =  drivebase.getDeath();
+    //TODO: Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+    //TODO: final ChassisSpeeds DEATH_SPEEDS =  drivebase.getDeath();
     //for others reviewing, the DEATH_SPEEDS variable at line 95 has been tested and is safe for robot use
     //drive team is aware of this
     // create triggers for primary buttons
     // if joystick doesn't have the button you need
-
-    //BooleanSupplier zeroGyro = () -> m_primary.getHID().getRawButton(2);
-    //Trigger zeroGyroTrig = new Trigger(zeroGyro);
-    
+    /*TODO: BooleanSupplier zeroGyro = () -> m_primary.getHID().getRawButton(2);
+    Trigger zeroGyroTrig = new Trigger(zeroGyro);
     BooleanSupplier deathMode = () -> m_primary.getHID().getRawButton(10);
-    Trigger deathModeTrig = new Trigger(deathMode);
+    Trigger deathModeTrig = new Trigger(deathMode);*/
 
     // Auto Orient (I dont believe we need this - Darwin )
-    m_primary.axisGreaterThan(6, .5).whileTrue(new AutoOrientCmd(drivebase, Constants.LIMELIGHT_PIPELINE_ID, 4.25, -3.9, 2));
+    //TODO:m_primary.axisGreaterThan(6, .5).whileTrue(new AutoOrientCmd(drivebase, Constants.LIMELIGHT_PIPELINE_ID, 4.25, -3.9, 2));
     // Auto Commands
 
-    drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    //TODO: drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
     // COMMAND/TRIGGER ASSIGNMENTS
-    m_primary.button(1).onChange(shooter.ToggleOverride()).whileTrue(shooter.Shoot()).onFalse(shooter.StopShooting());
+    m_primary.button(1).whileTrue(shooter.Shoot()).onFalse(shooter.StopShooting());
 
 
     // Primary Driver
-    deathModeTrig.whileTrue(drivebase.driveCmd(DEATH_SPEEDS));
+    //TODO:deathModeTrig.whileTrue(drivebase.driveCmd(DEATH_SPEEDS));
     // fullStopTrig.whileTrue(Commands.runOnce(drivebase::lock,
     // drivebase).repeatedly());
   }
@@ -130,10 +134,10 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return drivebase.getAutonomousCommand("New Auto");
+    return null;//todo:drivebase.getAutonomousCommand("New Auto");
   }
 
   public void setMotorBrake(boolean brake) {
-    drivebase.setMotorBrake(brake);
+    //TODO:drivebase.setMotorBrake(brake);
   }
 }

@@ -67,7 +67,7 @@ public final class Constants {
   /** The limelight pipeline id to be used with the limelight */
   public static final int LIMELIGHT_PIPELINE_ID = 0;
   /** Disables apriltag tracking :( */
-  public static final boolean SAD_LIMELIGHT_MODE = false;
+  public static final boolean SAD_LIMELIGHT_MODE = true; //True for testing
 
   public static final class SubsystemConstants {
     // not drivebase constants

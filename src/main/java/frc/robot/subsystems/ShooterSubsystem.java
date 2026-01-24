@@ -15,10 +15,20 @@ import frc.robot.util.drivers.LimelightHelpers.RawFiducial;
 import frc.robot.util.math.MathUtils;
 
 /** Shooter subsystem for controlling the flywheel(s) */
+
+// TODO: Tune PID values
+// TODO: Tune limelightcalc
+// TODO: Test PID stuff
+// TODO: Test limelight stuff
+
 public class ShooterSubsystem extends SubsystemBase {
     public static ShooterSubsystem Instance;
 
-    public double p, i, d;
+    public double 
+    p = 0, 
+    i = 0, 
+    d = 0;
+    
     public PIDController pidController;
     /**
      * If true, override drive control with april tag position
@@ -28,19 +38,21 @@ public class ShooterSubsystem extends SubsystemBase {
     SparkMax sparkMaxA, sparkMaxB;
     AbsoluteEncoder encoderA, encoderB;
 
-    public ShooterSubsystem(SwerveSubsystem drivebase) {
+    public ShooterSubsystem() {
         Instance = this;
 
         Log("Shooter subsystem loading...");
         Log("P: " + p + ", I: " + i + ", D: " + d);
-        pidController = new PIDController(p, i, d);
-        pidController.setSetpoint(1);
+        /*pidController = new PIDController(p, i, d);
+        pidController.setSetpoint(1);*/
 
-        sparkMaxA = new SparkMax(0, SparkMax.MotorType.kBrushless);
-        sparkMaxB = new SparkMax(1, SparkMax.MotorType.kBrushless);
+        sparkMaxA = new SparkMax(4, SparkMax.MotorType.kBrushless);
+        sparkMaxB = new SparkMax(5, SparkMax.MotorType.kBrushless);
 
         encoderA = sparkMaxA.getAbsoluteEncoder();
         encoderB = sparkMaxB.getAbsoluteEncoder();
+        //sparkMaxA.set(.5);
+        //sparkMaxB.set(.5);
 
         LimelightHelpers.setPipelineIndex("limelight", Constants.LIMELIGHT_PIPELINE_ID);
     }
@@ -89,8 +101,9 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     public Command Shoot() {
         return run(() -> {
-            sparkMaxA.set(pidController.calculate(encoderA.getPosition(), limelightCalculator()));
-            sparkMaxB.set(pidController.calculate(encoderB.getPosition(), limelightCalculator())); // facing same direction (as of 2026-01-24)
+            //pidController.setSetpoint(0.05);
+            sparkMaxA.set(0.1); // facing opposite dir
+            sparkMaxB.set(0.1); // facing same direction (as of 2026-01-24)
             // feed balls here
         });
     }
