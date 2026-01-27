@@ -25,7 +25,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public static ShooterSubsystem Instance;
 
     public double 
-    p = 0.04, 
+    p = 0.1,
     i = 0.01,
     d = 0;
     
@@ -54,8 +54,8 @@ public class ShooterSubsystem extends SubsystemBase {
         encoderB = sparkMaxB.getAbsoluteEncoder();
 
         pidController = new PIDController(p, i, d);
-        //pidController.setSetpoint(0.5);
-        pidController.setTolerance(0.05, 0.05);
+        pidController.setSetpoint(0);
+        //pidController.setTolerance(0.05, 0.05);
 
         LimelightHelpers.setPipelineIndex("limelight", Constants.LIMELIGHT_PIPELINE_ID);
     }
@@ -105,7 +105,7 @@ public class ShooterSubsystem extends SubsystemBase {
         if (trigger)
             return 0.7;
         else 
-            return 0;
+            return -0.2;
     };
 
     /**
@@ -116,7 +116,7 @@ public class ShooterSubsystem extends SubsystemBase {
             double beforeClamp = pidController.calculate(encoderA.getVelocity() / Constants.MAX_NEO_VORTEX_SPEED, getSetpoint.getAsDouble()) * 10;
             //System.out.println("Trigger: " + trigger + " ts: " + beforeClamp);
 
-            double speed = Math.min(beforeClamp, 0.7);
+            double speed = MathUtils.clamp( beforeClamp, 0, 0.7);
 
             sparkMaxA.set(speed); // facing opposite dir
             sparkMaxB.set(speed); // facing same direction (as of 2026-01-24)
