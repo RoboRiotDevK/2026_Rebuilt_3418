@@ -25,8 +25,8 @@ public class ShooterSubsystem extends SubsystemBase {
     public static ShooterSubsystem Instance;
 
     public double 
-    p = 0, 
-    i = 0, 
+    p = 0.04, 
+    i = 0.01,
     d = 0;
     
     public PIDController pidController;
@@ -34,6 +34,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * If true, override drive control with april tag position
      */
     public boolean overrideDrive = false;
+    static boolean trigger = false;
 
     SparkMax sparkMaxA, sparkMaxB;
     AbsoluteEncoder encoderA, encoderB;
@@ -46,13 +47,15 @@ public class ShooterSubsystem extends SubsystemBase {
         /*pidController = new PIDController(p, i, d);
         pidController.setSetpoint(1);*/
 
-        sparkMaxA = new SparkMax(4, SparkMax.MotorType.kBrushless);
-        sparkMaxB = new SparkMax(5, SparkMax.MotorType.kBrushless);
+        sparkMaxA = new SparkMax(16, SparkMax.MotorType.kBrushless);
+        sparkMaxB = new SparkMax(24, SparkMax.MotorType.kBrushless);
 
         encoderA = sparkMaxA.getAbsoluteEncoder();
         encoderB = sparkMaxB.getAbsoluteEncoder();
-        //sparkMaxA.set(.5);
-        //sparkMaxB.set(.5);
+
+        pidController = new PIDController(p, i, d);
+        //pidController.setSetpoint(0.5);
+        pidController.setTolerance(0.05, 0.05);
 
         LimelightHelpers.setPipelineIndex("limelight", Constants.LIMELIGHT_PIPELINE_ID);
     }
@@ -96,25 +99,27 @@ public class ShooterSubsystem extends SubsystemBase {
         });
     }
 
+    public Command triggerThing() {return runOnce(() -> {trigger = !trigger; } ); }
+
+    DoubleSupplier getSetpoint = () -> {
+        if (trigger)
+            return 0.7;
+        else 
+            return 0;
+    };
+
     /**
      * Command to shoot balls
      */
     public Command Shoot() {
         return run(() -> {
-            //pidController.setSetpoint(0.05);
-            sparkMaxA.set(0.1); // facing opposite dir
-            sparkMaxB.set(0.1); // facing same direction (as of 2026-01-24)
-            // feed balls here
-        });
-    }
+            double beforeClamp = pidController.calculate(encoderA.getVelocity() / Constants.MAX_NEO_VORTEX_SPEED, getSetpoint.getAsDouble()) * 10;
+            //System.out.println("Trigger: " + trigger + " ts: " + beforeClamp);
 
-    /**
-     * Command to stop shooting balls
-     */
-    public Command StopShooting() {
-        return run(() -> {
-            sparkMaxA.set(0);
-            sparkMaxB.set(0);
+            double speed = Math.min(beforeClamp, 0.7);
+
+            sparkMaxA.set(speed); // facing opposite dir
+            sparkMaxB.set(speed); // facing same direction (as of 2026-01-24)
         });
     }
 
@@ -132,6 +137,16 @@ public class ShooterSubsystem extends SubsystemBase {
             d = kD;
         });
     }
+
+    /**
+     * Debug command to update PID values
+     */
+    public Command UpdatePID() {
+        return runOnce(() -> {
+            pidController.setPID(p, i, d);
+        });
+    }
+
 
     /**
      * Log to console only in test mode

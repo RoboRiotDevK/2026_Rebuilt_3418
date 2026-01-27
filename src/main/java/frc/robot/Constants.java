@@ -68,6 +68,8 @@ public final class Constants {
   public static final int LIMELIGHT_PIPELINE_ID = 0;
   /** Disables apriltag tracking :( */
   public static final boolean SAD_LIMELIGHT_MODE = true; //True for testing
+  /** Max neo vortex motor speed in rpm */
+  public static final double MAX_NEO_VORTEX_SPEED = 1;
 
   public static final class SubsystemConstants {
     // not drivebase constants

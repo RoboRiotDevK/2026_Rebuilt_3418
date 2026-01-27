@@ -84,6 +84,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
   }
 
+  boolean triggerPressed = false;
+
   /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
@@ -98,6 +100,9 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+
+  
+
   private void configureBindings() {
     // DRIVETRAIN COMMAND ASSIGNMENTS R
     //TODO: Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
@@ -117,8 +122,10 @@ public class RobotContainer {
 
     //TODO: drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
+    m_primary.button(1).onChange(shooter.triggerThing());
+
     // COMMAND/TRIGGER ASSIGNMENTS
-    m_primary.button(1).whileTrue(shooter.Shoot()).onFalse(shooter.StopShooting());
+    shooter.setDefaultCommand(shooter.Shoot());
 
 
     // Primary Driver
