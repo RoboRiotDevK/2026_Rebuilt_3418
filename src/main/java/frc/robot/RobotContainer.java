@@ -23,6 +23,7 @@ import frc.robot.commands.AutoOrientCmd;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.util.LimelightTAMatrix;
+import frc.robot.util.ShooterDistanceMatrix;
 import swervelib.SwerveInputStream;
 
 /**
@@ -50,13 +51,12 @@ public class RobotContainer {
    * Converts driver input into a field-relative ChassisSpeeds that is controlled
    * by angular velocity.
    */
-  
-  
   public final DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
   private final DoubleSupplier aprilTag = () -> {
     if (shooter.overrideDrive) return shooter.aprilTagPos.getAsDouble();
     return getPosTwist.getAsDouble();
   };
+
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
       () -> m_primary.getY() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)),
       () -> m_primary.getX() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)))
@@ -69,7 +69,6 @@ public class RobotContainer {
    * Clones the angular velocity input stream and converts it to a fieldRelative
    * input stream.
    */
-
   public DoubleSupplier getNegTwist = () -> m_primary.getTwist();
   SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
       .withControllerHeadingAxis(m_primary::getTwist, getNegTwist)// checkfunction
@@ -81,6 +80,7 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
     LimelightTAMatrix.InitializeMatrix();
+    ShooterDistanceMatrix.InitializeMatrix();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
   }
