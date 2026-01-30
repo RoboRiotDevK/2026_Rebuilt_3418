@@ -22,6 +22,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoOrientCmd;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.util.LimelightTAMatrix;
 import swervelib.SwerveInputStream;
 
 /**
@@ -40,8 +41,8 @@ public class RobotContainer {
 
   // Driver speeds
 
-  /*private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-      "swerve/neo"));*/
+  private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
+      "swerve/neo"));
 
   private final ShooterSubsystem shooter = new ShooterSubsystem();
 
@@ -51,7 +52,7 @@ public class RobotContainer {
    */
   
   
-  /*public final DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
+  public final DoubleSupplier getPosTwist = () -> m_primary.getRawAxis(5) * -1;
   private final DoubleSupplier aprilTag = () -> {
     if (shooter.overrideDrive) return shooter.aprilTagPos.getAsDouble();
     return getPosTwist.getAsDouble();
@@ -61,7 +62,7 @@ public class RobotContainer {
       () -> m_primary.getX() * ((m_primary.getZ() - (23.0 / 9.0)) / (40.0 / 9.0)))
       .withControllerRotationAxis(aprilTag)
       .deadband(OperatorConstants.DEADBAND)
-      .allianceRelativeControl(true);*/
+      .allianceRelativeControl(true);
 
 
   /**
@@ -69,17 +70,17 @@ public class RobotContainer {
    * input stream.
    */
 
-  /* 
   public DoubleSupplier getNegTwist = () -> m_primary.getTwist();
   SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
       .withControllerHeadingAxis(m_primary::getTwist, getNegTwist)// checkfunction
-      .headingWhile(true);*/
+      .headingWhile(true);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     configureBindings();
+    LimelightTAMatrix.InitializeMatrix();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
   }
@@ -105,22 +106,22 @@ public class RobotContainer {
 
   private void configureBindings() {
     // DRIVETRAIN COMMAND ASSIGNMENTS R
-    //TODO: Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
-    //TODO: final ChassisSpeeds DEATH_SPEEDS =  drivebase.getDeath();
+    Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+    final ChassisSpeeds DEATH_SPEEDS =  drivebase.getDeath();
     //for others reviewing, the DEATH_SPEEDS variable at line 95 has been tested and is safe for robot use
     //drive team is aware of this
     // create triggers for primary buttons
     // if joystick doesn't have the button you need
-    /*TODO: BooleanSupplier zeroGyro = () -> m_primary.getHID().getRawButton(2);
+    BooleanSupplier zeroGyro = () -> m_primary.getHID().getRawButton(2);
     Trigger zeroGyroTrig = new Trigger(zeroGyro);
     BooleanSupplier deathMode = () -> m_primary.getHID().getRawButton(10);
-    Trigger deathModeTrig = new Trigger(deathMode);*/
+    Trigger deathModeTrig = new Trigger(deathMode);
 
     // Auto Orient (I dont believe we need this - Darwin )
-    //TODO:m_primary.axisGreaterThan(6, .5).whileTrue(new AutoOrientCmd(drivebase, Constants.LIMELIGHT_PIPELINE_ID, 4.25, -3.9, 2));
+    m_primary.axisGreaterThan(6, .5).whileTrue(new AutoOrientCmd(drivebase, Constants.LIMELIGHT_PIPELINE_ID, 4.25, -3.9, 2));
     // Auto Commands
 
-    //TODO: drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+    drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
     m_primary.button(1).onChange(shooter.triggerThing());
 
@@ -129,7 +130,7 @@ public class RobotContainer {
 
 
     // Primary Driver
-    //TODO:deathModeTrig.whileTrue(drivebase.driveCmd(DEATH_SPEEDS));
+    deathModeTrig.whileTrue(drivebase.driveCmd(DEATH_SPEEDS));
     // fullStopTrig.whileTrue(Commands.runOnce(drivebase::lock,
     // drivebase).repeatedly());
   }
@@ -145,6 +146,6 @@ public class RobotContainer {
   }
 
   public void setMotorBrake(boolean brake) {
-    //TODO:drivebase.setMotorBrake(brake);
+    drivebase.setMotorBrake(brake);
   }
 }

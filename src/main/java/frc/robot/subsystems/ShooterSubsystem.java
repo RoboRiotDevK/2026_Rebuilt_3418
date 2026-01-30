@@ -6,20 +6,19 @@ import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.LimelightTAMatrix;
+import frc.robot.util.ShooterDistanceMatrix;
 import frc.robot.util.drivers.LimelightHelpers;
-import frc.robot.util.drivers.LimelightHelpers.RawFiducial;
 import frc.robot.util.math.MathUtils;
 
 /** Shooter subsystem for controlling the flywheel(s) */
 
-// TODO: Tune PID values
 // TODO: Tune limelightcalc
-// TODO: Test PID stuff
-// TODO: Test limelight stuff
 
 public class ShooterSubsystem extends SubsystemBase {
     public static ShooterSubsystem Instance;
@@ -47,8 +46,8 @@ public class ShooterSubsystem extends SubsystemBase {
         /*pidController = new PIDController(p, i, d);
         pidController.setSetpoint(1);*/
 
-        sparkMaxA = new SparkMax(16, SparkMax.MotorType.kBrushless);
-        sparkMaxB = new SparkMax(24, SparkMax.MotorType.kBrushless);
+        sparkMaxA = new SparkMax(31, SparkMax.MotorType.kBrushless);
+        sparkMaxB = new SparkMax(32, SparkMax.MotorType.kBrushless);
 
         encoderA = sparkMaxA.getAbsoluteEncoder();
         encoderB = sparkMaxB.getAbsoluteEncoder();
@@ -66,10 +65,10 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     public DoubleSupplier aprilTagPos = () -> {
         if (!LimelightHelpers.getTV("limelight") || Constants.SAD_LIMELIGHT_MODE) return 0;
-        for (RawFiducial target : LimelightHelpers.getRawFiducials("limelight")) {
-            if (target.id == 10 || target.id == 25) { // both tag ids at hub
-                return MathUtils.clamp(target.txnc, -0.8, 0.8);
-            }
+
+        if (LimelightHelpers.getTID() == 10 || LimelightHelpers.getTID() == 25) {
+            Pose3d pose = LimelightHelpers.getBotPose3d_TargetSpace("limelight");
+            return pose.getX(); // i think x???
         }
 
         return 0;
@@ -80,15 +79,15 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return flywheel speed (0.05 to 1)
      */
     public double limelightCalculator() {
-        if (!LimelightHelpers.getTV("limelight") || Constants.SAD_LIMELIGHT_MODE) return 0.85; // set flywheel speed regardless of vision
-        for (RawFiducial target : LimelightHelpers.getRawFiducials("limelight")) {
-            if (target.id == 10 || target.id == 25) {
-                return MathUtils.clamp((Math.max(target.distToCamera, 0.05)) / 10, 0.05, 1); // TUNE THIS PLEASE
-            }
+        if (!LimelightHelpers.getTV("limelight") || Constants.SAD_LIMELIGHT_MODE) return 0.7; // set flywheel speed regardless of vision
+
+        if (LimelightHelpers.getTID() == 10 || LimelightHelpers.getTID() == 26) {
+            double pose = LimelightHelpers.getTA("limelight");
+            return ShooterDistanceMatrix.get(LimelightTAMatrix.get(pose));
         }
 
 
-        return 0.85;
+        return 0.7;
     }
     /**
      * Toggle override for drive control
@@ -103,7 +102,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     DoubleSupplier getSetpoint = () -> {
         if (trigger)
-            return 0.7;
+            return limelightCalculator();
         else 
             return -0.2;
     };
@@ -114,11 +113,13 @@ public class ShooterSubsystem extends SubsystemBase {
     public Command Shoot() {
         return run(() -> {
             double beforeClamp = pidController.calculate(encoderA.getVelocity() / Constants.MAX_NEO_VORTEX_SPEED, getSetpoint.getAsDouble()) * 10;
-            //System.out.println("Trigger: " + trigger + " ts: " + beforeClamp);
+            //var setpoint = getSetpoint.getAsDouble();
+            //if (setpoint > 0)
+            //    System.out.println("ts: " + setpoint);
 
             double speed = MathUtils.clamp( beforeClamp, 0, 0.7);
 
-            sparkMaxA.set(speed); // facing opposite dir
+            sparkMaxA.set(speed);
             sparkMaxB.set(speed); // facing same direction (as of 2026-01-24)
         });
     }

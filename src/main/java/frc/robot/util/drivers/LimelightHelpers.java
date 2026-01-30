@@ -1184,8 +1184,21 @@ public class LimelightHelpers {
         return getLimelightNTDoubleArray(limelightName, "tc");
     }
 
-    public static double getFiducialID(String limelightName) {
+    /**
+     * Gets the primary april tag id in view
+     * @param limelightName The id of the limelight
+     * @return the id of the april tag
+     */
+    public static double getTID(String limelightName) {
         return getLimelightNTDouble(limelightName, "tid");
+    }
+
+    /**
+     * Gets the primary april tag id in view
+     * @return The april tag id
+     */
+    public static double getTID() {
+        return getLimelightNTDouble("limelight", "tid");
     }
 
     public static String getNeuralClassID(String limelightName) {

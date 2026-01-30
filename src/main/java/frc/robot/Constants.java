@@ -67,17 +67,12 @@ public final class Constants {
   /** The limelight pipeline id to be used with the limelight */
   public static final int LIMELIGHT_PIPELINE_ID = 0;
   /** Disables apriltag tracking :( */
-  public static final boolean SAD_LIMELIGHT_MODE = true; //True for testing
+  public static final boolean SAD_LIMELIGHT_MODE = false; //True for testing
   /** Max neo vortex motor speed in rpm */
   public static final double MAX_NEO_VORTEX_SPEED = 1;
 
   public static final class SubsystemConstants {
-    // not drivebase constants
-    public static final int ELEVMOT1ID = 20;
-    public static final int ELEVMOT2ID = 21;
-    public static final int GAMEPIECE_SENSOR_ID = 0;
-    public static final int CLAW_ID = 2;
-    public static final int ARM_ID = 22;
-    public static final double SPIN_SPEED = 0.05; // placeholder value
+    public static final int SHOOTER_MOTOR_A = 0;
+    public static final int SHOOTER_MOTOR_B = 0;
   }
 }
